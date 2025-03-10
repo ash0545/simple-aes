@@ -1,7 +1,10 @@
 # REFERENCING: AES Standard, Block Breakers (https://davidwong.fr/blockbreakers/aes.html)
 
-# constants / lookups
+# ==============================================================================
+#                              AES CONSTANTS AND LOOKUP TABLES
+# ==============================================================================
 
+# Substitution Box for SubBytes
 sbox = [
     0x63,
     0x7C,
@@ -261,6 +264,7 @@ sbox = [
     0x16,
 ]
 
+# Inverse Substitution Box for InvSubBytes step
 inv_sbox = [
     0x52,
     0x09,
@@ -519,6 +523,8 @@ inv_sbox = [
     0x0C,
     0x7D,
 ]
+
+# Required Multiplications in GF(2^8)
 
 multiply_by_2 = [
     0x00,
@@ -2333,8 +2339,11 @@ rcon = [
     0x8D,
 ]
 
-# Key expansion
-# Aes-128 => we need 11 keys
+# ==============================================================================
+#                            KEY EXPANSION
+# ==============================================================================
+
+#  AES-128 => we need 11 keys
 
 
 # "Word" as in 4 bytes
@@ -2388,7 +2397,9 @@ def KeyExpansion(key):
     return expanded_keys
 
 
-# AES encrypt
+# ==============================================================================
+#                            AES ENCRYPTION FUNCTIONS
+# ==============================================================================
 
 
 def SubBytes(state):
@@ -2456,7 +2467,9 @@ def encrypt(state, round_keys):
     return state
 
 
-# AES decrypt
+# ==============================================================================
+#                            AES DECRYPTION FUNCTIONS
+# ==============================================================================
 
 
 def InvShiftRows(state):
@@ -2542,7 +2555,9 @@ def decrypt(state, round_keys):
     return state
 
 
-# Helper functions (thx gpt the 🐐)
+# ==============================================================================
+#                           HELPER FUNCTIONS
+# ==============================================================================
 
 
 def hex_string_to_matrix(hex_string):
@@ -2559,7 +2574,10 @@ def matrix_to_hex_string(matrix):
     return "".join(f"{byte:02x}" for byte in flat_list)
 
 
-# Main function
+# ==============================================================================
+#                                   MAIN
+# ==============================================================================
+
 
 if __name__ == "__main__":
     # Example key as a hex string (Taken from example vector in Appendix C of AES Standard)
