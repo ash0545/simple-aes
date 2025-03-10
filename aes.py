@@ -2390,6 +2390,40 @@ def KeyExpansion(key):
 
 # AES encrypt
 
+
+def SubBytes(state):
+    return [[sbox[elem] for elem in row] for row in state]
+
+
+def ShiftRows(state):
+    # Row 1: No shift
+    state[1] = state[1][1:] + state[1][:1]
+    state[2] = state[2][2:] + state[2][:2]
+    state[3] = state[3][3:] + state[3][:3]
+
+    return state
+
+
+def MixColumns(state):
+    # Column i : state[0][i], state[1][i], state[2][i], state[3][i]
+    for i in range(3):
+        a0, a1, a2, a3 = state[0][i], state[1][i], state[2][i], state[3][i]
+
+        state[0][i] = multiply_by_2[a0] ^ multiply_by_3[a1] ^ a2 ^ a3
+        state[1][i] = multiply_by_2[a1] ^ multiply_by_3[a2] ^ a3 ^ a0
+        state[2][i] = multiply_by_2[a2] ^ multiply_by_3[a3] ^ a0 ^ a1
+        state[3][i] = multiply_by_2[a3] ^ multiply_by_3[a0] ^ a1 ^ a2
+
+    return state
+
+
+def AddRoundKey(state, round_key):
+    for i in range(4):
+        for j in range(4):
+            state[i][j] ^= round_key[i][j]
+    return state
+
+
 # AES decrypt
 
 
