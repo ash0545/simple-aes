@@ -2506,7 +2506,40 @@ def InvMixColumns(state):
 
 
 def decrypt(state, round_keys):
-    pass
+    # inverse of pre-whitening ie., xor-ing state with last round key
+    state = AddRoundKey(state, round_keys[10])
+    print(f"Inverse Pre-whitening: {matrix_to_hex_string(state)}")
+    # n - 1 rounds
+    for i in range(9, 0, -1):
+        print(f"Inverse Round {i} start: {matrix_to_hex_string(state)}")
+
+        state = InvShiftRows(state)
+        print(f"InvShiftRows: {matrix_to_hex_string(state)}")
+
+        state = InvSubBytes(state)
+        print(f"InvSubBytes: {matrix_to_hex_string(state)}")
+
+        state = AddRoundKey(state, round_keys[i])
+        print(f"AddRoundKey: {matrix_to_hex_string(state)}")
+
+        state = InvMixColumns(state)
+
+        print()
+
+    # last round with absence of MixColumns
+    print(f"Last Round start: {matrix_to_hex_string(state)}")
+
+    state = InvShiftRows(state)
+    print(f"InvShiftRows: {matrix_to_hex_string(state)}")
+
+    state = InvSubBytes(state)
+    print(f"InvSubBytes: {matrix_to_hex_string(state)}")
+
+    state = AddRoundKey(state, round_keys[0])
+
+    print()
+
+    return state
 
 
 # Helper functions (thx gpt the 🐐)
@@ -2554,3 +2587,8 @@ if __name__ == "__main__":
 
     encrypted = encrypt(start_state, round_keys)
     print(f"Encryption Result: {matrix_to_hex_string(encrypted)}")
+
+    print()
+
+    decrypted = decrypt(encrypted, round_keys)
+    print(f"Decryption Result: {matrix_to_hex_string(decrypted)}")
