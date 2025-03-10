@@ -2406,7 +2406,7 @@ def ShiftRows(state):
 
 def MixColumns(state):
     # Column i : state[0][i], state[1][i], state[2][i], state[3][i]
-    for i in range(3):
+    for i in range(4):
         a0, a1, a2, a3 = state[0][i], state[1][i], state[2][i], state[3][i]
 
         state[0][i] = multiply_by_2[a0] ^ multiply_by_3[a1] ^ a2 ^ a3
@@ -2421,6 +2421,38 @@ def AddRoundKey(state, round_key):
     for i in range(4):
         for j in range(4):
             state[i][j] ^= round_key[i][j]
+    return state
+
+
+def encrypt(state, round_keys):
+    # pre-whitening ie., xor-ing state with first round key
+    state = AddRoundKey(state, round_keys[0])
+    print(f"Pre-whitening: {matrix_to_hex_string(state)}")
+    # n - 1 rounds
+    for i in range(1, 10):
+        print(f"Round {i} start: {matrix_to_hex_string(state)}")
+        state = SubBytes(state)
+        print(f"SubBytes: {matrix_to_hex_string(state)}")
+
+        state = ShiftRows(state)
+        print(f"ShiftRows: {matrix_to_hex_string(state)}")
+
+        state = MixColumns(state)
+        print(f"MixColumns: {matrix_to_hex_string(state)}")
+
+        state = AddRoundKey(state, round_keys[i])
+        print()
+
+    # last round with absence of MixColumns
+    print(f"Last Round start: {matrix_to_hex_string(state)}")
+    state = SubBytes(state)
+    print(f"SubBytes: {matrix_to_hex_string(state)}")
+
+    state = ShiftRows(state)
+    print(f"ShiftRows: {matrix_to_hex_string(state)}")
+    state = AddRoundKey(state, round_keys[10])
+    print()
+
     return state
 
 
@@ -2447,8 +2479,8 @@ def matrix_to_hex_string(matrix):
 # Main function
 
 if __name__ == "__main__":
-    # Test key as a hex string (Taken from example in Appendix A of AES Standard)
-    hex_key = "2b7e151628aed2a6abf7158809cf4f3c"
+    # Example key as a hex string (Taken from example vector in Appendix C of AES Standard)
+    hex_key = "000102030405060708090a0b0c0d0e0f"
     # hex_key = "d6aa74fdd2af72fadaa678f1d6ab76fe"
     print(f"Initial Key: {hex_key}")
 
@@ -2460,3 +2492,15 @@ if __name__ == "__main__":
     print("Expanded Round Keys:")
     for i, round_key in enumerate(round_keys):
         print(f"Round {i}: {matrix_to_hex_string(round_key)}")
+
+    # Example plaintext as hex string (Taken from example vector in Appendix C of AES Standard)
+    hex_plain_text = "00112233445566778899aabbccddeeff"
+    start_state = hex_string_to_matrix(hex_plain_text)
+    print("Plaintext Start State:")
+    for row in start_state:
+        print([hex(x)[2:].zfill(2) for x in row])  # Print matrix in hex format
+
+    print()
+
+    encrypted = encrypt(start_state, round_keys)
+    print(f"Encryption Result: {matrix_to_hex_string(encrypted)}")
