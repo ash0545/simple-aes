@@ -2337,30 +2337,53 @@ rcon = [
 # Aes-128 => we need 11 keys
 
 
+# "Word" as in 4 bytes
 def RotWord(word):
-    pass
+    return word[1:] + [word[0]]
 
 
 def SubWord(word):
-    pass
+    return [sbox[x] for x in word]
 
 
 def Rcon(x):
-    pass
+    return [rcon[x], 0x00, 0x00, 0x00]
 
 
-# Assume key as a 2d array for ease of implementation
+# Assuming key as a 2d array for ease of implementation
 def KeyExpansion(key):
-    expanded_keys = [key]  # First round key is the original key itself
+    expanded_keys = [key]
 
     for round in range(10):
         prev_round_key = expanded_keys[-1]
         curr_round_key = []
 
         # Extract last column
-        lastCol = [prev_round_key[row][-1] for row in range(4)]
+        last_col = [prev_round_key[row][-1] for row in range(4)]
 
-        pass
+        # Perform transformations
+        rotated = RotWord(last_col)
+        substituted = SubWord(rotated)
+        rcon_col = Rcon(round + 1)  # Rcon index should start from 1
+
+        # Compute first column of new round key
+        first_col = [
+            substituted[j] ^ prev_round_key[j][0] ^ rcon_col[j] for j in range(4)
+        ]
+        curr_round_key.append(first_col)
+
+        # Compute remaining columns
+        for col in range(1, 4):
+            new_col = [
+                curr_round_key[col - 1][j] ^ prev_round_key[j][col] for j in range(4)
+            ]
+            curr_round_key.append(new_col)
+
+        # Transpose to maintain column-major order
+        curr_round_key = [
+            [curr_round_key[col][row] for col in range(4)] for row in range(4)
+        ]
+        expanded_keys.append(curr_round_key)
 
     return expanded_keys
 
@@ -2368,3 +2391,38 @@ def KeyExpansion(key):
 # AES encrypt
 
 # AES decrypt
+
+
+# Helper functions (thx gpt the 🐐)
+
+
+def hex_string_to_matrix(hex_string):
+    """Converts a 32-character hex string into a 4x4 column-major order matrix."""
+    bytes_list = [int(hex_string[i : i + 2], 16) for i in range(0, len(hex_string), 2)]
+    return [bytes_list[i::4] for i in range(4)]  # Convert to 4x4 matrix
+
+
+def matrix_to_hex_string(matrix):
+    """Converts a 4x4 matrix back to a hex string."""
+    flat_list = [
+        matrix[row][col] for col in range(4) for row in range(4)
+    ]  # Column-major order
+    return "".join(f"{byte:02x}" for byte in flat_list)
+
+
+# Main function
+
+if __name__ == "__main__":
+    # Test key as a hex string (Taken from example in Appendix A of AES Standard)
+    hex_key = "2b7e151628aed2a6abf7158809cf4f3c"
+    # hex_key = "d6aa74fdd2af72fadaa678f1d6ab76fe"
+    print(f"Initial Key: {hex_key}")
+
+    key_matrix = hex_string_to_matrix(hex_key)
+
+    # Generate round keys
+    round_keys = KeyExpansion(key_matrix)
+    # Print the round keys in hex format
+    print("Expanded Round Keys:")
+    for i, round_key in enumerate(round_keys):
+        print(f"Round {i}: {matrix_to_hex_string(round_key)}")
