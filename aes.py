@@ -2459,6 +2459,56 @@ def encrypt(state, round_keys):
 # AES decrypt
 
 
+def InvShiftRows(state):
+    # Row 1: No shift
+    state[1] = state[1][3:] + state[1][:3]
+    state[2] = state[2][2:] + state[2][:2]
+    state[3] = state[3][1:] + state[3][:1]
+
+    return state
+
+
+def InvSubBytes(state):
+    return [[inv_sbox[elem] for elem in row] for row in state]
+
+
+def InvMixColumns(state):
+    # Column i : state[0][i], state[1][i], state[2][i], state[3][i]
+    for i in range(4):
+        a0, a1, a2, a3 = state[0][i], state[1][i], state[2][i], state[3][i]
+
+        state[0][i] = (
+            multiply_by_14[a0]
+            ^ multiply_by_11[a1]
+            ^ multiply_by_13[a2]
+            ^ multiply_by_9[a3]
+        )
+        state[1][i] = (
+            multiply_by_14[a1]
+            ^ multiply_by_11[a2]
+            ^ multiply_by_13[a3]
+            ^ multiply_by_9[a0]
+        )
+        state[2][i] = (
+            multiply_by_14[a2]
+            ^ multiply_by_11[a3]
+            ^ multiply_by_13[a0]
+            ^ multiply_by_9[a1]
+        )
+        state[3][i] = (
+            multiply_by_14[a3]
+            ^ multiply_by_11[a0]
+            ^ multiply_by_13[a1]
+            ^ multiply_by_9[a2]
+        )
+
+    return state
+
+
+def decrypt(state, round_keys):
+    pass
+
+
 # Helper functions (thx gpt the 🐐)
 
 
