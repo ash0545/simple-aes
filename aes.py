@@ -2333,6 +2333,38 @@ rcon = [
     0x8D,
 ]
 
+# Key expansion
+# Aes-128 => we need 11 keys
+
+
+def RotWord(word):
+    pass
+
+
+def SubWord(word):
+    pass
+
+
+def Rcon(x):
+    pass
+
+
+# Assume key as a 2d array for ease of implementation
+def KeyExpansion(key):
+    expanded_keys = [key]  # First round key is the original key itself
+
+    for round in range(10):
+        prev_round_key = expanded_keys[-1]
+        curr_round_key = []
+
+        # Extract last column
+        lastCol = [prev_round_key[row][-1] for row in range(4)]
+
+        pass
+
+    return expanded_keys
+
+
 # AES encrypt
 
 # AES decrypt
